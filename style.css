@@ -81,8 +81,8 @@ h2 { font-size: 15px; font-weight: 690; }
 .save-state { color: var(--mint); font-size: 12px; }
 .save-state.unsaved { color: var(--muted); }
 .save-state::before { content: "●"; margin-right: 6px; font-size: 8px; vertical-align: 1px; }
-.examples-label { display: grid; gap: 3px; font-size: 12px; }
-select { padding: 6px 9px; max-width: 100%; }
+.examples-label { display: grid; grid-template-columns: minmax(0, 1fr); gap: 3px; font-size: 12px; }
+select { padding: 6px 9px; min-width: 0; max-width: 100%; }
 .workbench { display: grid; grid-template-columns: 176px minmax(300px, 1fr) minmax(290px, 34%); gap: 14px; align-items: stretch; }
 .panel { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); min-width: 0; }
 .tools-panel { padding: 17px 15px; }
@@ -274,6 +274,7 @@ progress { width: 100%; accent-color: var(--accent); }
   .project-actions button, .project-actions button.primary { padding-inline: 7px; font-size: 12px; }
   .project-heading { min-height: 76px; gap: 8px; }
   .examples-label { width: 113px; }
+  .examples-label select { width: 100%; text-overflow: ellipsis; }
   .workbench { grid-template-columns: 1fr; }
   .tools-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 16px; align-items: start; }
   .tools-panel > h2 { display: none; }

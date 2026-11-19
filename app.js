@@ -181,6 +181,7 @@
       cards[i].classList.toggle("is-selected", i === selected);
       cards[i].classList.toggle("is-playing", playing && i === playbackIndex);
       cards[i].setAttribute("aria-pressed", String(i === selected));
+      cards[i].tabIndex = i === selected ? 0 : -1;
     }
     const card = cards[selected];
     if (scroll && card) {
