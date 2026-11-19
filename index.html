@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10141b">
+  <meta name="description" content="Draw, animate, and share 8×8 animations for Weather Light.">
+  <title>Weather Light Studio</title>
+  <link rel="icon" href="favicon.png" type="image/png">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="model.js"></script>
+  <script defer src="assets/device-art.js"></script>
+  <script defer src="preview.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header class="masthead">
+    <div class="masthead-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <div><h1>Weather Light Studio</h1><p>8 × 8 animation editor</p></div>
+      </div>
+      <nav class="project-actions" aria-label="Project">
+        <button id="new-project" type="button">New</button>
+        <button id="open-project" type="button">Open</button>
+        <button id="export-project" class="primary" type="button">Export <span aria-hidden="true">↓</span></button>
+        <input id="project-file" type="file" accept=".json,.wla,application/json" hidden>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <div class="project-heading">
+      <div class="project-title">
+        <label for="project-title">Animation name</label>
+        <input id="project-title" type="text" maxlength="80" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="project-meta">
+        <span id="save-state" class="save-state"></span>
+        <label class="examples-label">Examples <select id="examples" aria-label="Load example">
+          <option value="" selected>Choose a starting point</option>
+        </select></label>
+      </div>
+    </div>
+    <div class="workbench">
+      <aside class="panel tools-panel" aria-label="Drawing tools">
+        <h2>Tools</h2>
+        <div class="tool-list" aria-label="Tool">
+          <button type="button" data-tool="pencil" aria-pressed="true" title="Draw (B)"><span aria-hidden="true">✎</span> Draw <kbd>B</kbd></button>
+          <button type="button" data-tool="eraser" aria-pressed="false" title="Eraser (E)"><span aria-hidden="true">◫</span> Eraser <kbd>E</kbd></button>
+          <button type="button" data-tool="fill" aria-pressed="false" title="Fill touching cells (F)"><span aria-hidden="true">◩</span> Fill <kbd>F</kbd></button>
+          <button type="button" data-tool="picker" aria-pressed="false" title="Pick color from grid (I)"><span aria-hidden="true">⊙</span> Pick color <kbd>I</kbd></button>
+        </div>
+        <div class="palette-block">
+          <h2>Colors</h2>
+          <div id="palette" class="palette" aria-label="Color presets"></div>
+          <label for="custom-color" class="custom-color">
+            <input id="custom-color" type="color" value="#FFBE66" aria-label="Custom color">
+            <span><strong>Custom</strong><small id="current-color">#FFBE66</small></span>
+          </label>
+        </div>
+        <label class="trace"><input id="trace" type="checkbox"> Trace last frame</label>
+      </aside>
+      <section class="panel draw-panel" aria-labelledby="draw-heading">
+        <div class="panel-header">
+          <div><h2 id="draw-heading">Drawing</h2><p id="frame-label"></p></div>
+          <div class="button-row" aria-label="Drawing history">
+            <button id="undo" class="compact" type="button" title="Undo (Ctrl or Cmd + Z)">↶ <span>Undo</span></button>
+            <button id="redo" class="compact" type="button" title="Redo (Ctrl or Cmd + Shift + Z)" aria-label="Redo">↷</button>
+          </div>
+        </div>
+        <div class="board">
+          <div id="column-labels" class="column-labels" aria-hidden="true"></div>
+          <div id="row-labels" class="row-labels" aria-hidden="true"></div>
+          <div id="pixel-grid" class="pixel-grid" role="grid" aria-label="8 by 8 LED drawing grid" aria-rowcount="8" aria-colcount="8"></div>
+        </div>
+        <div class="board-footer"><span id="tool-hint">Click or drag to draw.</span><button id="clear-frame" class="text-button" type="button">Clear frame</button></div>
+      </section>
+      <section class="panel preview-panel" aria-labelledby="preview-heading">
+        <div class="panel-header">
+          <h2 id="preview-heading">Preview</h2>
+          <div class="segmented" aria-label="Preview view">
+            <button data-view="grid" type="button" aria-pressed="false">Grid</button>
+            <button data-view="device" type="button" aria-pressed="true">On light</button>
+          </div>
+        </div>
+        <div class="preview-stage" id="preview-stage" data-view="device">
+          <canvas id="preview" width="640" height="752" aria-label="Animation preview"></canvas>
+        </div>
+        <div class="playback">
+          <button id="play" class="play" type="button" title="Play or pause (Space)">▶ Play</button>
+          <span id="preview-position"></span>
+          <label><input id="loop" type="checkbox" checked> Loop</label>
+        </div>
+      </section>
+    </div>
+    <section class="panel timeline-panel" aria-labelledby="timeline-heading">
+      <div class="panel-header">
+        <div><h2 id="timeline-heading">Frames</h2><p id="timeline-count"></p></div>
+        <div class="button-row timeline-actions">
+          <button id="add-frame" type="button">＋ Add frame</button>
+          <button id="duplicate-frame" type="button">Duplicate</button>
+          <button id="delete-frame" type="button">Delete</button>
+        </div>
+      </div>
+      <div id="timeline" class="timeline" aria-label="Animation frames"></div>
+      <div class="frame-controls">
+        <div class="button-row">
+          <button id="move-left" class="compact" type="button" title="Move frame earlier" aria-label="Move frame earlier">←</button>
+          <button id="move-right" class="compact" type="button" title="Move frame later" aria-label="Move frame later">→</button>
+        </div>
+        <label for="duration">Frame duration <span class="input-unit"><input id="duration" type="number" inputmode="numeric" step="1" required><span>ms</span></span></label>
+        <span id="timing-hint" class="muted"></span>
+      </div>
+    </section>
+    <footer><button id="help" class="text-button" type="button">How to use this studio</button><span>Projects save in this browser.</span></footer>
+  </main>
+  <dialog id="export-dialog" aria-labelledby="export-title">
+    <div class="dialog-header"><div><h2 id="export-title">Export animation</h2><p>Choose a file for sharing, previewing, or installing.</p></div><button class="close-dialog compact" type="button" aria-label="Close">✕</button></div>
+    <div class="export-options">
+      <button data-export="project" type="button"><strong>Editable project</strong><span>Send this JSON file so someone else can open and edit it.</span><small>.json</small></button>
+      <button data-export="animation" type="button"><strong>Animated preview</strong><span>Export a full-color animation in the currently selected preview view.</span><small>.png</small></button>
+      <button data-export="still" type="button"><strong>Current frame</strong><span>Save a still image in the currently selected preview view.</span><small>.png</small></button>
+      <button data-export="device" type="button"><strong>For the Weather Light</strong><span>Download CustomAnimation.h for the Arduino sketch.</span><small>.h</small></button>
+    </div>
+    <progress id="export-progress" hidden value="0" max="1"></progress>
+    <p id="export-status" role="status" class="dialog-status"></p>
+  </dialog>
+  <dialog id="help-dialog" aria-labelledby="help-title">
+    <div class="dialog-header"><h2 id="help-title">Using Weather Light Studio</h2><button class="close-dialog compact" type="button" aria-label="Close">✕</button></div>
+    <ol class="guide">
+      <li>Choose a color, then click or drag on the 8 × 8 drawing grid. On a keyboard, use arrow keys to move and Enter to paint.</li>
+      <li>Use <strong>Duplicate</strong> to keep a drawing and change a few pixels in the next frame. <strong>Trace last frame</strong> shows the previous frame behind unlit cells.</li>
+      <li>Press <strong>Play</strong> and switch between the plain grid and the housing preview. Frame duration is how long each drawing stays on screen.</li>
+      <li>Choose <strong>Export → Editable project</strong> to send your animation. The recipient uses <strong>Open</strong> to load it.</li>
+      <li>To install an animation, export <strong>For the Weather Light</strong>. Unzip the <a href="weather-light-animation-firmware.zip" download>animation-ready Arduino sketch</a> and put <code>CustomAnimation.h</code> next to <code>WeatherLight.ino</code>. Follow the included guide to upload through the rear DATA port. Tap Mode until the OLED shows <strong>CUSTOM</strong>.</li>
+    </ol>
+    <p class="muted">Shortcuts on desktop include B for Draw, E for Eraser, F for Fill, I for Pick color, and Space to play from the workspace.</p>
+  </dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <noscript><p class="toast">Enable JavaScript to use the editor.</p></noscript>
+</body>
+</html>
